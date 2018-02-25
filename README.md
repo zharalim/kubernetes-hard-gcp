@@ -1,5 +1,8 @@
 # kubernetes-hard-gcp
-Try to do https://github.com/kelseyhightower/kubernetes-the-hard-way
+
+This is a repo in which I'll do Kubernetes the hard way tutorial 
+(https://github.com/kelseyhightower/kubernetes-the-hard-way) and try to learn something about 
+cloud and kubernetes on the way. 
 
 Manual steps:
 1. `gcloud init`

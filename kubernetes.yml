@@ -1,0 +1,31 @@
+--- 
+
+- hosts: localhost
+  gather_facts: false
+  tasks: 
+  - name: Create network
+    local_action:
+      module: gce_net
+      name: 'kubernetes-the-hard-way'
+      subnet_name: kubernetes
+      ipv4_range: '10.240.0.0/24'
+      mode: custom
+      state: present
+      credentials_file: '{{ gce_credentials_file }}'
+      service_account_email: '{{ gce_service_account_email }}'
+      project_id: '{{ gce_project_id }}'
+
+  - name: Create firewall rules
+    local_action:
+      module: gce_net
+      name: default
+      fwname: "kubernetes-the-hard-way-allow-internal"
+      allowed: 'tcp,udp,icmp'
+      state: "present"
+      src_range: '{{ item }}'
+      credentials_file: '{{ gce_credentials_file }}'
+      service_account_email: '{{ gce_service_account_email }}'
+      project_id: '{{ gce_project_id }}'
+    with_items: 
+      - '10.200.0.0/16'
+      - '10.240.0.0/24'

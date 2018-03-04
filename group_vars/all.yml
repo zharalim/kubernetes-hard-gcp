@@ -1,0 +1,6 @@
+---
+
+gce_credentials_file: 'secrets/service-credentials.json'
+
+gce_service_account_email: "{{ lookup('file', gce_credentials_file) | from_json | json_query('client_email') }}"
+gce_project_id: "{{ lookup('file', gce_credentials_file) | from_json | json_query('project_id') }}"

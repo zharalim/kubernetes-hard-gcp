@@ -1,6 +1,6 @@
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "hashicorp/precise64"
+  config.vm.box = "ubuntu/xenial64"
   config.vm.hostname = "kubernetes-control"
 
   config.vm.provision "shell", path: "scripts/init.sh"

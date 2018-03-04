@@ -27,3 +27,11 @@ echo "Installing kubectl"
 wget -q --timestamping https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl
 chmod +x kubectl
 sudo cp kubectl /usr/local/bin/
+
+# Ansible
+echo "Installing Ansible"
+sudo apt-get install -y software-properties-common
+sudo apt-add-repository -y ppa:ansible/ansible
+sudo apt-get update
+sudo apt-get install -y ansible python-pip
+sudo pip install apache-libcloud jmespath

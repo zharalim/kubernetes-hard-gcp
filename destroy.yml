@@ -1,0 +1,15 @@
+---
+
+- hosts: localhost
+  gather_facts: false
+  tasks: 
+  - name: Destroy network
+    local_action:
+      module: gce_net
+      name: 'kubernetes-the-hard-way'
+      subnet_name: kubernetes
+      subnet_region: '{{ gce_region }}'
+      state: absent
+      credentials_file: '{{ gce_credentials_file }}'
+      service_account_email: '{{ gce_service_account_email }}'
+      project_id: '{{ gce_project_id }}'

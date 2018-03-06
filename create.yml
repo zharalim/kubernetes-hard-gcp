@@ -1,0 +1,118 @@
+--- 
+
+- hosts: localhost
+  gather_facts: false
+  tasks: 
+  - name: Create network
+    local_action:
+      module: gce_net
+      name: '{{ gce_network_name }}'
+      mode: custom
+      subnet_name: '{{ gce_subnet_name }}'
+      subnet_region: '{{ gce_region }}'
+      ipv4_range: '10.240.0.0/24'
+      state: present
+      credentials_file: '{{ gce_credentials_file }}'
+      service_account_email: '{{ gce_service_account_email }}'
+      project_id: '{{ gce_project_id }}'
+    tags: network
+
+  - name: Firewall rules to allow vm's to access each other
+    local_action:
+      module: gce_net
+      name: '{{ gce_network_name }}'
+      fwname: 'kubernetes-the-hard-way-allow-internal'
+      allowed: 'tcp;udp;icmp'
+      state: present
+      src_range: 
+        - 10.200.0.0/16
+        - 10.240.0.0/24
+      credentials_file: '{{ gce_credentials_file }}'
+      service_account_email: '{{ gce_service_account_email }}'
+      project_id: '{{ gce_project_id }}'
+    tags: network
+
+  - name: Firewall rules to allow external access
+    local_action:
+      module: gce_net
+      name: '{{ gce_network_name }}'
+      fwname: 'kubernetes-the-hard-way-allow-external'
+      allowed: 'tcp:22,6443;icmp'
+      state: 'present'
+      src_range: 
+        - 0.0.0.0/0
+      credentials_file: '{{ gce_credentials_file }}'
+      service_account_email: '{{ gce_service_account_email }}'
+      project_id: '{{ gce_project_id }}'
+    tags: network
+
+  - name: Allocate a static IP address for the external load balancer front
+    local_action:
+      module: gce_eip
+      name: 'kubernetes-the-hard-way'
+      region: '{{ gce_region }}'
+      state: present
+      credentials_file: '{{ gce_credentials_file }}'
+      service_account_email: '{{ gce_service_account_email }}'
+      project_id: '{{ gce_project_id }}'
+    tags: network
+
+  - name: Create kubernetes controllers
+    local_action:
+      module: gce
+      name: 'controller'
+      num_instances: '{{ kubernetes_controller_count }}'
+      zone: '{{ gce_zone }}'
+      machine_type: n1-standard-1
+      image_family: ubuntu-1604-lts
+      disk_size: 200 
+      state: present
+      service_account_permissions: 
+        - compute-rw
+        - storage-ro
+        - service-management
+        - service-control
+        - logging-write
+        - monitoring
+      network: '{{ gce_network_name }}'
+      subnetwork: '{{ gce_subnet_name }}'
+      ip_forward: true
+      tags: 
+        - kubernetes-the-hard-way
+        - controller
+      credentials_file: '{{ gce_credentials_file }}'
+      service_account_email: '{{ gce_service_account_email }}'
+      project_id: '{{ gce_project_id }}'
+    register: controllers
+    tags: controller
+  
+  - name: Create kubernetes workers
+    local_action:
+      module: gce
+      name: 'worker-{{ item }}'
+      zone: '{{ gce_zone }}'
+      machine_type: n1-standard-1
+      image_family: ubuntu-1604-lts
+      disk_size: 200 
+      state: present
+      service_account_permissions: 
+        - compute-rw
+        - storage-ro
+        - service-management
+        - service-control
+        - logging-write
+        - monitoring
+      network: '{{ gce_network_name }}'
+      subnetwork: '{{ gce_subnet_name }}'
+      ip_forward: true
+      metadata: 
+        'pod-cidr': '10.200.{{ item }}.0/24'
+      tags: 
+        - kubernetes-the-hard-way
+        - worker
+      credentials_file: '{{ gce_credentials_file }}'
+      service_account_email: '{{ gce_service_account_email }}'
+      project_id: '{{ gce_project_id }}'
+    with_sequence: 'start=0 count={{ kubernetes_controller_count }} format=%03x'
+    register: workers
+    tags: worker

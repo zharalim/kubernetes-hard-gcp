@@ -1,15 +1,68 @@
 ---
 
+
 - hosts: localhost
   gather_facts: false
   tasks: 
-  - name: Destroy network
-    local_action:
-      module: gce_net
-      name: 'kubernetes-the-hard-way'
-      subnet_name: kubernetes
-      subnet_region: '{{ gce_region }}'
-      state: absent
-      credentials_file: '{{ gce_credentials_file }}'
-      service_account_email: '{{ gce_service_account_email }}'
-      project_id: '{{ gce_project_id }}'
+    - name: Destroy kubernetes workers
+      local_action:
+        module: gce
+        name: 'worker-{{ item }}'
+        zone: '{{ gce_zone }}'
+        state: absent
+        credentials_file: '{{ gce_credentials_file }}'
+        service_account_email: '{{ gce_service_account_email }}'
+        project_id: '{{ gce_project_id }}'
+      with_sequence: 'start=0 count={{ kubernetes_controller_count }} format=%03x'
+      tags: worker
+
+    - name: Destroy kubernetes controllers
+      local_action:
+        module: gce
+        name: 'controller-{{ item }}'
+        zone: '{{ gce_zone }}'
+        state: absent
+        credentials_file: '{{ gce_credentials_file }}'
+        service_account_email: '{{ gce_service_account_email }}'
+        project_id: '{{ gce_project_id }}'
+      with_sequence: 'start=0 count={{ kubernetes_controller_count }} format=%03x'
+      tags: controller
+
+    - name: Free static IP address
+      local_action:
+        module: gce_eip
+        name: 'kubernetes-the-hard-way'
+        region: '{{ gce_region }}'
+        state: absent
+        credentials_file: '{{ gce_credentials_file }}'
+        service_account_email: '{{ gce_service_account_email }}'
+        project_id: '{{ gce_project_id }}'
+      # This module fails if the ip doesn't exist
+      ignore_errors: true
+      tags: network
+
+    - name: Destroy Firewall rules
+      local_action:
+        module: gce_net
+        name: '{{ gce_network_name }}'
+        fwname: '{{ item }}'
+        state: 'absent'
+        credentials_file: '{{ gce_credentials_file }}'
+        service_account_email: '{{ gce_service_account_email }}'
+        project_id: '{{ gce_project_id }}'
+      with_items: 
+        - kubernetes-the-hard-way-allow-internal
+        - kubernetes-the-hard-way-allow-external
+      tags: network
+
+    - name: Destroy network
+      local_action:
+        module: gce_net
+        name: '{{ gce_network_name }}'
+        subnet_name: '{{ gce_subnet_name }}'
+        subnet_region: '{{ gce_region }}'
+        state: absent
+        credentials_file: '{{ gce_credentials_file }}'
+        service_account_email: '{{ gce_service_account_email }}'
+        project_id: '{{ gce_project_id }}'
+      tags: network

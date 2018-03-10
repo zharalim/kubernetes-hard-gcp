@@ -1,0 +1,37 @@
+---
+
+- name: Create ca cert directory
+  file: 
+    path: '{{ item }}'
+    state: directory
+    mode: 0700
+    owner: '{{ cfssl_ca_user }}'
+    group: '{{ cfssl_ca_group }}'
+  with_items: 
+    - '{{ cfssl_ca_dir }}'
+    - '{{ cfssl_ca_conf_dir }}'
+    - '{{ cfssl_ca_certs_dir }}'
+    - '{{ cfssl_ca_request_dir }}'
+  become: true
+
+- name: Copy configurations
+  copy: 
+    src: '{{ item }}'
+    dest: '{{ cfssl_ca_conf_dir }}/{{ item }}'
+  with_items:
+    - 'ca-config.json'
+    - 'ca-csr.json'
+
+- name: Generate CA certificate and private key
+  shell: 'cfssl gencert -initca {{ cfssl_ca_conf_dir }}/ca-csr.json | cfssljson -bare ca'
+  args:
+    chdir: '{{ cfssl_ca_certs_dir }}'
+    creates: '{{ cfssl_ca_certs_dir }}/ca-key.pem'
+
+- name: Set CA certificate permissions
+  file: 
+    path: '{{ item }}'
+    mode: 0600
+    state: file
+  with_items: 
+    - '{{ cfssl_ca_certs_dir }}/ca-key.pem'

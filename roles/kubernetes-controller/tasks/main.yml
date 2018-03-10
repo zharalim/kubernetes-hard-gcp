@@ -1,0 +1,10 @@
+---
+
+# - name: Certificate request for admin user
+#   import_role: 
+#     name: cfssl-csr
+#   vars: 
+#     cfssl_csr: 
+#       name: admin
+#       # The included role seems to evaluate role_path to itself.
+#       csr_path: '{{ playbook_dir }}/roles/kubernetes-controller/files/admin-csr.json'

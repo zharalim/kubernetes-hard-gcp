@@ -1,0 +1,23 @@
+---
+
+- name: Certificate request for kubelet
+  import_role: 
+    name: cfssl-csr
+  vars: 
+    cfssl_csr: 
+      name: '{{ inventory_hostname }}'
+      hostnames:
+        - '{{ inventory_hostname }}'
+        - '{{ host_external_ip }}'
+        - '{{ host_internal_ip }}'
+      # The included role seems to evaluate role_path to itself.
+      csr_path: '{{ playbook_dir }}/roles/kubernetes-worker/templates/worker-csr.json'
+
+- name: Copy certificates to host
+  copy: 
+    src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
+    # TODO proper dir
+    dest: '/tmp/{{ item }}'
+  with_items:
+    - '{{ inventory_hostname }}.pem'
+    - '{{ inventory_hostname }}-key.pem'

@@ -1,0 +1,8 @@
+
+localhost ansible_connection=local ansible_user=vagrant
+
+[certificate-authorities]
+localhost
+
+[kubernetes-clients]
+localhost

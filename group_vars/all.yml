@@ -13,3 +13,13 @@ gce_subnet_name: kubernetes
 
 kubernetes_controller_count: 3
 kubernetes_worker_count: 3
+
+kubernetes_local_certs_dir: '{{ playbook_dir }}/certs/'
+
+cfssl_ca_dir: '/opt/ca'
+cfssl_ca_certs_dir: '{{ cfssl_ca_dir }}/certs'
+cfssl_ca_conf_dir: '{{ cfssl_ca_dir }}/conf'
+cfssl_ca_request_dir: '{{ cfssl_ca_dir }}/requests'
+
+cfssl_ca_user: vagrant
+cfssl_ca_group: vagrant

@@ -1,0 +1,16 @@
+---
+
+- hosts: certificate-authorities
+  roles: 
+    - cfssl-ca
+  tags: ca
+
+- hosts: kubernetes-clients
+  roles: 
+    - kubernetes-client
+  tags: clients
+
+- hosts: kubernetes-workers
+  roles: 
+    - kubernetes-worker
+  tags: workers

@@ -3,3 +3,4 @@ secrets
 certs
 *.log
 *.retry
+inventory/gce.ini

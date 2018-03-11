@@ -6,10 +6,12 @@ gce_service_account_email: "{{ lookup('file', gce_credentials_file) | from_json 
 gce_project_id: "{{ lookup('file', gce_credentials_file) | from_json | json_query('project_id') }}"
 
 gce_region: europe-west3
-gce_zone: europe-west3-a
+gce_zone: '{{ gce_region }}-a'
 
 gce_network_name: kubernetes-the-hard-way
 gce_subnet_name: kubernetes
+
+kubernetes_api_static_ip_address_name: kubernetes-the-hard-way
 
 kubernetes_controller_count: 3
 kubernetes_worker_count: 3

@@ -49,7 +49,7 @@
   - name: Allocate a static IP address for the external load balancer front
     local_action:
       module: gce_eip
-      name: 'kubernetes-the-hard-way'
+      name: '{{ kubernetes_api_static_ip_address_name }}'
       region: '{{ gce_region }}'
       state: present
       credentials_file: '{{ gce_credentials_file }}'
@@ -117,17 +117,6 @@
     register: workers
     tags: worker
 
-  # TODO remove debugs
-  - debug:
-      var: controllers
-  
-  - debug:
-      msg: '{{item.1}}'
-    with_subelements:
-      - '{{ workers.results }}'
-      - 'instance_data'
-    tags: worker
-
   - name: Wait for controllers' SSH to come up
     wait_for: 
       host: '{{ item.public_ip }}'
@@ -152,29 +141,6 @@
       label: '{{ item.1.name }}'
     tags: worker
 
-  - name: Add controllers to Ansible
-    add_host: 
-      hostname: '{{ item.name }}'
-      ansible_host: '{{ item.public_ip }}'
-      host_external_ip: '{{ item.public_ip }}'
-      host_internal_ip: '{{ item.private_ip }}'
-      groupname: kubernetes-controllers
-    with_items: '{{ controllers.instance_data }}'
-    loop_control:
-      label: '{{ item.name }}'
-    tags: controller
-  
-  - name: Add workers to Ansible
-    add_host: 
-      hostname: '{{ item.1.name }}'
-      ansible_host: '{{ item.1.public_ip }}'
-      host_external_ip: '{{ item.1.public_ip }}'
-      host_internal_ip: '{{ item.1.private_ip }}'
-      groupname: kubernetes-workers
-    with_subelements:
-      - '{{ workers.results }}'
-      - 'instance_data'
-    loop_control:
-      label: '{{ item.1.name }}'
-    tags: worker
+  - name: Refresh inventory to ensure the new instances exist in inventory
+    meta: refresh_inventory
 

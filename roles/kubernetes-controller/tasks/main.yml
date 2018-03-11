@@ -1,10 +1,32 @@
 ---
 
-# - name: Certificate request for admin user
-#   import_role: 
-#     name: cfssl-csr
-#   vars: 
-#     cfssl_csr: 
-#       name: admin
-#       # The included role seems to evaluate role_path to itself.
-#       csr_path: '{{ playbook_dir }}/roles/kubernetes-controller/files/admin-csr.json'
+- name: Get API ip address 
+  local_action: command gcloud compute addresses describe {{ kubernetes_api_static_ip_address_name }} --region {{ gce_region }} --format 'value(address)'
+  changed_when: false
+  register: kubernetes_api_static_ip_address
+  run_once: true
+
+- name: Certificate request for Kubernetes API Server certificate
+  import_role: 
+    name: cfssl-csr
+  vars: 
+    cfssl_csr: 
+      name: kubernetes
+      hostnames: "{{ kubernetes_controller_csr_hostnames_base 
+        + kubenernetes_controllers_private_ip_list 
+        + [kubernetes_api_static_ip_address.stdout] }}"
+      # The included role seems to evaluate role_path to itself.
+      csr_path: '{{ playbook_dir }}/roles/kubernetes-controller/files/kubernetes-csr.json'
+  run_once: true
+
+- name: Copy certificates to host
+  copy: 
+    src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
+    # TODO proper dir
+    dest: '/tmp/{{ item }}'
+  with_items:
+    - 'kubernetes.pem'
+    - 'kubernetes-key.pem'
+    - 'ca.pem'
+    - 'ca-key.pem'
+    

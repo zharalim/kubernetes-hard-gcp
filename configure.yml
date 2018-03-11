@@ -10,7 +10,12 @@
     - kubernetes-client
   tags: clients
 
-- hosts: kubernetes-workers
+- hosts: tag_controller
+  roles: 
+    - kubernetes-controller
+  tags: controllers
+
+- hosts: tag_worker
   roles: 
     - kubernetes-worker
   tags: workers

@@ -1,0 +1,9 @@
+---
+
+kubernetes_controller_csr_hostnames_base:
+  # TODO where does this come from?
+  - 10.32.0.1,
+  - 127.0.0.1,
+  - kubernetes.default
+
+kubenernetes_controllers_private_ip_list: "{{ groups['tag_controller'] | map('extract', hostvars, 'gce_private_ip') | list }}"

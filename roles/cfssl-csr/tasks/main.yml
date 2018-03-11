@@ -1,5 +1,7 @@
 ---
 
+# TODO this is overly complicated for this usage
+
 - name: Create local cert directory
   local_action: 
     module: file
@@ -12,6 +14,7 @@
     dest: '{{ cfssl_ca_request_dir}}/{{ item | basename }}'
   with_items: 
     - '{{ cfssl_csr.csr_path }}' 
+  delegate_to: "{{ groups['certificate-authorities'][0] }}"
 
 - name: Generate CA certificate and private key
   shell: > 
@@ -28,8 +31,7 @@
   delegate_to: "{{ groups['certificate-authorities'][0] }}"
 
 - name: Fetch certs
-  local_action:
-    module: fetch
+  fetch:
     src: '{{ cfssl_ca_certs_dir }}/{{ item }}'
     dest: '{{ kubernetes_local_certs_dir }}/{{ item }}'
     fail_on_missing: true
@@ -37,4 +39,6 @@
   with_items: 
     - '{{ cfssl_csr.name }}-key.pem'
     - '{{ cfssl_csr.name }}.pem'
+    - 'ca.pem'
+    - 'ca-key.pem'
   delegate_to: "{{ groups['certificate-authorities'][0] }}"

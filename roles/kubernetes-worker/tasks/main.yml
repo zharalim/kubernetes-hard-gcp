@@ -8,8 +8,8 @@
       name: '{{ inventory_hostname }}'
       hostnames:
         - '{{ inventory_hostname }}'
-        - '{{ host_external_ip }}'
-        - '{{ host_internal_ip }}'
+        - '{{ gce_private_ip }}'
+        - '{{ gce_public_ip }}'
       # The included role seems to evaluate role_path to itself.
       csr_path: '{{ playbook_dir }}/roles/kubernetes-worker/templates/worker-csr.json'
 
@@ -21,3 +21,5 @@
   with_items:
     - '{{ inventory_hostname }}.pem'
     - '{{ inventory_hostname }}-key.pem'
+    - 'ca.pem'
+    

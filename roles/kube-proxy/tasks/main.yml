@@ -1,17 +1,15 @@
 ---
 
-- name: Create certificates
-  block: 
-  - name: Certificate request
-    import_role: 
-      name: cfssl-csr
-    vars: 
-      cfssl_csr: 
-        name: kube-proxy
-        csr_path: '{{ playbook_dir }}/roles/kube-proxy/files/proxy-csr.json'
-
 - name: Create configuration
   block: 
+    - name: Certificate request
+      import_role: 
+        name: cfssl-csr
+      vars: 
+        cfssl_csr: 
+          name: kube-proxy
+          csr_path: '{{ playbook_dir }}/roles/kube-proxy/files/proxy-csr.json'
+
     - name: Create configuration File
       local_action: > 
         command kubectl config set-cluster kubernetes-the-hard-way 
@@ -35,6 +33,7 @@
         --user=system:node:{{ inventory_hostname }} \
         --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kube_proxy_local_config_file }}
   run_once: true
+  tags: configure
 
 - name: Copy config to hosts
   copy: 
@@ -43,3 +42,4 @@
     dest: '/tmp/{{ item }}'
   with_items:
     - '{{ kube_proxy_local_config_file }}'
+  tags: configure

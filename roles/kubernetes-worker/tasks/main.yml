@@ -2,29 +2,29 @@
 
 - name: Create kubelet certificates
   block: 
-  - name: Certificate request for kubelet
-    import_role: 
-      name: cfssl-csr
-    vars: 
-      cfssl_csr: 
-        name: '{{ inventory_hostname }}'
-        hostnames:
-          - '{{ inventory_hostname }}'
-          - '{{ gce_private_ip }}'
-          - '{{ gce_public_ip }}'
-        # The included role seems to evaluate role_path to itself.
-        csr_path: '{{ playbook_dir }}/roles/kubernetes-worker/templates/worker-csr.json.j2'
+    - name: Certificate request for kubelet
+      import_role: 
+        name: cfssl-csr
+      vars: 
+        cfssl_csr: 
+          name: '{{ inventory_hostname }}'
+          hostnames:
+            - '{{ inventory_hostname }}'
+            - '{{ gce_private_ip }}'
+            - '{{ gce_public_ip }}'
+          # The included role seems to evaluate role_path to itself.
+          csr_path: '{{ playbook_dir }}/roles/kubernetes-worker/templates/worker-csr.json.j2'
 
-  - name: Copy certificates to host
-    copy: 
-      src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
-      # TODO proper dir
-      dest: '/tmp/{{ item }}'
-    with_items:
-      - '{{ inventory_hostname }}.pem'
-      - '{{ inventory_hostname }}-key.pem'
-      - 'ca.pem'
-      
+    - name: Copy certificates to host
+      copy: 
+        src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
+        # TODO proper dir
+        dest: '/tmp/{{ item }}'
+      with_items:
+        - '{{ inventory_hostname }}.pem'
+        - '{{ inventory_hostname }}-key.pem'
+        - 'ca.pem'
+  tags: configure
 
 - name: Create Kubelet configuration
   block: 
@@ -72,3 +72,4 @@
         dest: '/tmp/{{ item }}'
       with_items:
         - '{{ kubernetes_worker_local_config_file }}'
+  tags: configure

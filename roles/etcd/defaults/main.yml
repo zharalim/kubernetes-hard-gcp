@@ -4,7 +4,7 @@ etcd_version: 3.2.11
 etcd_binary_package_name: etcd-v{{ etcd_version }}-linux-amd64
 
 etcd_bin_dir: /usr/local/bin
-etcd_lib_dir: /var/lib/etcd
+etcd_data_dir: /var/lib/etcd
 etcd_config_dir: /etc/etcd 
 
 etcd_instance_name: '{{ inventory_hostname }}'

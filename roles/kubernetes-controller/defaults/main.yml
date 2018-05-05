@@ -1,0 +1,15 @@
+---
+
+kubernetes_version: 1.9.0
+
+kubernetes_etcd_client_port: 2379
+
+kubernetes_controller_csr_hostnames_base:
+  # TODO Fix first ip address
+  - 10.32.0.1,
+  - 127.0.0.1,
+  - kubernetes.default
+
+kubernetes_controller_host_ip_list: "{{ groups['tag_controller'] | map('extract', hostvars, 'gce_private_ip') | list }}"
+
+kubernetes_download_url_base: https://storage.googleapis.com/kubernetes-release/release

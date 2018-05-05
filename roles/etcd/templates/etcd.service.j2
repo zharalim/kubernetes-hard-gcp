@@ -22,7 +22,7 @@ ExecStart={{ etcd_bin_dir }}/etcd \
         {{ hostvars[host].inventory_hostname }}=https://{{ hostvars[host].gce_private_ip }}:{{ hostvars[host].etcd_port | default(etcd_port) }},
     {%- endfor %} \
   --initial-cluster-state new \
-  --data-dir={{ etcd_lib_dir }}
+  --data-dir={{ etcd_data_dir }}
 Restart=on-failure
 RestartSec=5
 

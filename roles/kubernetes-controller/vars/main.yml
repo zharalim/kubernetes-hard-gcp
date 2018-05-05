@@ -1,11 +1,6 @@
 ---
 
-kubernetes_controller_csr_hostnames_base:
-  # TODO Fix first ip address
-  - 10.32.0.1,
-  - 127.0.0.1,
-  - kubernetes.default
-
-kubernetes_controller_host_ip_list: "{{ groups['tag_controller'] | map('extract', hostvars, 'gce_private_ip') | list }}"
-
 kubernetes_controller_encryption_config_local: '{{ kubernetes_local_configs_dir }}/encryption_config.yml'
+
+kubernetes_controller_bin_dir: /usr/local/bin
+kubernetes_controller_data_dir: /var/lib/kubernetes

@@ -6,4 +6,6 @@ kubernetes_controller_csr_hostnames_base:
   - 127.0.0.1,
   - kubernetes.default
 
-kubenernetes_controllers_private_ip_list: "{{ groups['tag_controller'] | map('extract', hostvars, 'gce_private_ip') | list }}"
+kubernetes_controller_private_ip_list: "{{ groups['tag_controller'] | map('extract', hostvars, 'gce_private_ip') | list }}"
+
+kubernetes_controller_encryption_config_local: '{{ kubernetes_local_configs_dir }}/encryption_config.yml'

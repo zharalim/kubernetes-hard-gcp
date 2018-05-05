@@ -8,7 +8,7 @@
     vars: 
       cfssl_csr: 
         name: kube-proxy
-        csr_path: '{{ playbook_dir }}/roles/kube-proxy/templates/proxy-csr.json'
+        csr_path: '{{ playbook_dir }}/roles/kube-proxy/files/proxy-csr.json'
 
 - name: Create configuration
   block: 

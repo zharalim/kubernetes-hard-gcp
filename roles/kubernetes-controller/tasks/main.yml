@@ -13,7 +13,7 @@
     cfssl_csr: 
       name: kubernetes
       hostnames: "{{ kubernetes_controller_csr_hostnames_base 
-        + kubenernetes_controllers_private_ip_list 
+        + kubernetes_controller_private_ip_list 
         + [kubernetes_api_static_ip_address.stdout] }}"
       # The included role seems to evaluate role_path to itself.
       csr_path: '{{ playbook_dir }}/roles/kubernetes-controller/files/kubernetes-csr.json'
@@ -29,4 +29,32 @@
     - 'kubernetes-key.pem'
     - 'ca.pem'
     - 'ca-key.pem'
+
+
+- name: Check if encryption key exists
+  stat: 
+    path: '{{ kubernetes_controller_encryption_config_local }}'
+  register: encryption_key_file_stat
+
+- name: Generate encryption key
+  block: 
+    - name: Generate encryption key
+      local_action: 'shell head -c 32 /dev/urandom | base64'
+      register: generated_encryption_key
     
+    - set_fact: kubernetes_controller_encryption_key='{{ generated_encryption_key.stdout }}'
+
+    - name: Save encryption key locally
+      local_action:
+        module: template
+        src: encryption_config.yml.j2
+        dest: '{{ kubernetes_controller_encryption_config_local }}'
+
+  run_once: true
+  when: encryption_key_file_stat.stat.exists == false
+
+- name: Copy encryption config to host
+  template: 
+    src: '{{ kubernetes_controller_encryption_config_local }}'
+    # TODO path
+    dest: '/tmp/encryption_config.yml'

@@ -1,6 +1,8 @@
 .vagrant
 secrets
+configs
 certs
 *.log
 *.retry
 inventory/gce.ini
+ssh.conf

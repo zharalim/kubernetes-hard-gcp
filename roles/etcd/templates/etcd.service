@@ -1,0 +1,30 @@
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart={{ etcd_bin_dir }}/etcd \
+  --name {{ inventory_hostname }} \
+  --cert-file={{ etcd_config_dir }}/kubernetes.pem \
+  --key-file={{ etcd_config_dir }}/kubernetes-key.pem \
+  --peer-cert-file={{ etcd_config_dir }}/kubernetes.pem \
+  --peer-key-file={{ etcd_config_dir }}/kubernetes-key.pem \
+  --trusted-ca-file={{ etcd_config_dir }}/ca.pem \
+  --peer-trusted-ca-file={{ etcd_config_dir }}/ca.pem \
+  --peer-client-cert-auth \
+  --client-cert-auth \
+  --initial-advertise-peer-urls https://{{ gce_private_ip }}:{{ etcd_port }} \
+  --listen-peer-urls https://{{ gce_private_ip }}:{{ etcd_port }} \
+  --listen-client-urls https://{{ gce_private_ip }}:{{ etcd_client_port }},http://127.0.0.1:{{ etcd_client_port }} \
+  --advertise-client-urls https://{{ gce_private_ip }}:{{ etcd_client_port }} \
+  --initial-cluster-token etcd-cluster-0 \
+  --initial-cluster {% for host in etcd_cluster_hosts -%} 
+        {{ hostvars[host].inventory_hostname }}=https://{{ hostvars[host].gce_private_ip }}:{{ hostvars[host].etcd_port | default(etcd_port) }},
+    {%- endfor %} \
+  --initial-cluster-state new \
+  --data-dir={{ etcd_lib_dir }}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

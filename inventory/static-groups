@@ -1,0 +1,3 @@
+
+[etcd-servers:children]
+tag_controller

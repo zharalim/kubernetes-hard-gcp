@@ -1,0 +1,67 @@
+---
+
+- name: Create dirs
+  file: 
+    path: '{{ item }}'
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+  with_items: 
+    - '{{ etcd_bin_dir }}'
+    - '{{ etcd_lib_dir }}'
+    - /tmp/etcd
+
+- name: Get binaries
+  unarchive: 
+    src: https://github.com/coreos/etcd/releases/download/v{{ etcd_version }}/{{ etcd_binary_package_name }}.tar.gz
+    dest: /tmp/etcd/
+    remote_src: true
+
+- name: Install binary
+  copy: 
+    src: /tmp/etcd/{{ etcd_binary_package_name }}/{{ item }}
+    dest: '{{ etcd_bin_dir }}/{{ item }}'
+    remote_src: true
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+  with_items: 
+    - etcd
+    - etcdctl
+
+- name: Copy certificates to host
+  copy: 
+    src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
+    dest: '/{{ etcd_config_dir }}/{{ item }}'
+  become: true
+  with_items:
+    - kubernetes.pem
+    - kubernetes-key.pem
+    - ca.pem
+    
+- name: Copy service config
+  template: 
+    src: etcd.service
+    dest: /etc/systemd/system/etcd.service
+    mode: '0600'
+  become: true
+  notify: Reload systemctl daemon
+
+- name: Start etcd
+  service:
+    name: etcd
+    state: started
+    enabled: true
+  become: true
+
+- name: Verify etcd connection
+  command: etcdctl member list
+  environment: 
+    ETCDCTL_API: 3
+  register: etcd_member_output
+
+- debug:
+    var: etcd_member_output

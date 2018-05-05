@@ -12,6 +12,7 @@
 
 - hosts: tag_controller
   roles: 
+    - etcd
     - kubernetes-controller
   tags: controllers
 

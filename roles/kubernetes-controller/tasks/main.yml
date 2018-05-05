@@ -13,7 +13,7 @@
     cfssl_csr: 
       name: kubernetes
       hostnames: "{{ kubernetes_controller_csr_hostnames_base 
-        + kubernetes_controller_private_ip_list 
+        + kubernetes_controller_host_ip_list 
         + [kubernetes_api_static_ip_address.stdout] }}"
       # The included role seems to evaluate role_path to itself.
       csr_path: '{{ playbook_dir }}/roles/kubernetes-controller/files/kubernetes-csr.json'

@@ -1,0 +1,3 @@
+---
+
+ kube_proxy_local_config_file: kube-proxy.kubeconfig

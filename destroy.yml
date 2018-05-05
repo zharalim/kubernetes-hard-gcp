@@ -1,5 +1,6 @@
 ---
 
+# TODO change to use dynamic inventory
 
 - hosts: localhost
   gather_facts: false

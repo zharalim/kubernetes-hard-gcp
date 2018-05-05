@@ -18,4 +18,5 @@
 - hosts: tag_worker
   roles: 
     - kubernetes-worker
+    - kube-proxy
   tags: workers

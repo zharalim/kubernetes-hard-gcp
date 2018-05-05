@@ -14,5 +14,4 @@ Getting Ansible running:
 1. Run `gcloud compute config-ssh`
 
 TODO:
-1. Proxy cert not yet done https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md
-1. Continue https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/05-kubernetes-configuration-files.md
+1. Continue https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/06-data-encryption-keys.md

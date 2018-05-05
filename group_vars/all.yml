@@ -16,7 +16,8 @@ kubernetes_api_static_ip_address_name: kubernetes-the-hard-way
 kubernetes_controller_count: 3
 kubernetes_worker_count: 3
 
-kubernetes_local_certs_dir: '{{ playbook_dir }}/certs/'
+kubernetes_local_certs_dir: '{{ playbook_dir }}/certs'
+kubernetes_local_configs_dir: '{{ playbook_dir }}/configs'
 
 cfssl_ca_dir: '/opt/ca'
 cfssl_ca_certs_dir: '{{ cfssl_ca_dir }}/certs'

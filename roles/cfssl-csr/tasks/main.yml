@@ -11,7 +11,7 @@
 - name: Copy CSR to CA
   template: 
     src: '{{ item }}'
-    dest: '{{ cfssl_ca_request_dir}}/{{ item | basename }}'
+    dest: '{{ cfssl_ca_request_dir}}/{{ inventory_hostname }}-{{ item | basename }}'
   with_items: 
     - '{{ cfssl_csr.csr_path }}' 
   delegate_to: "{{ groups['certificate-authorities'][0] }}"
@@ -24,7 +24,7 @@
     -config={{ cfssl_ca_conf_dir }}/ca-config.json 
     -hostname={{ cfssl_csr.hostnames | default(cfssl_csr.name) | join(',') }}
     -profile=kubernetes 
-    {{ cfssl_ca_request_dir }}/{{ cfssl_csr.csr_path | basename }} | cfssljson -bare {{ cfssl_csr.name }}
+    {{ cfssl_ca_request_dir }}/{{ inventory_hostname }}-{{ cfssl_csr.csr_path | basename }} | cfssljson -bare {{ cfssl_csr.name }}
   args:
     chdir: '{{ cfssl_ca_certs_dir }}'
     creates: '{{ cfssl_ca_certs_dir }}/{{ cfssl_csr.name }}-key.pem'

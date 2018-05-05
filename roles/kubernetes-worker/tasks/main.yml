@@ -1,25 +1,74 @@
 ---
 
-- name: Certificate request for kubelet
-  import_role: 
-    name: cfssl-csr
-  vars: 
-    cfssl_csr: 
-      name: '{{ inventory_hostname }}'
-      hostnames:
-        - '{{ inventory_hostname }}'
-        - '{{ gce_private_ip }}'
-        - '{{ gce_public_ip }}'
-      # The included role seems to evaluate role_path to itself.
-      csr_path: '{{ playbook_dir }}/roles/kubernetes-worker/templates/worker-csr.json'
+- name: Create kubelet certificates
+  block: 
+  - name: Certificate request for kubelet
+    import_role: 
+      name: cfssl-csr
+    vars: 
+      cfssl_csr: 
+        name: '{{ inventory_hostname }}'
+        hostnames:
+          - '{{ inventory_hostname }}'
+          - '{{ gce_private_ip }}'
+          - '{{ gce_public_ip }}'
+        # The included role seems to evaluate role_path to itself.
+        csr_path: '{{ playbook_dir }}/roles/kubernetes-worker/templates/worker-csr.json'
 
-- name: Copy certificates to host
-  copy: 
-    src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
-    # TODO proper dir
-    dest: '/tmp/{{ item }}'
-  with_items:
-    - '{{ inventory_hostname }}.pem'
-    - '{{ inventory_hostname }}-key.pem'
-    - 'ca.pem'
-    
+  - name: Copy certificates to host
+    copy: 
+      src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
+      # TODO proper dir
+      dest: '/tmp/{{ item }}'
+    with_items:
+      - '{{ inventory_hostname }}.pem'
+      - '{{ inventory_hostname }}-key.pem'
+      - 'ca.pem'
+      
+
+- name: Create Kubelet configuration
+  block: 
+    - name: Get API ip address 
+      local_action: >
+        command gcloud compute addresses describe {{ kubernetes_api_static_ip_address_name }} 
+        --region {{ gce_region }}
+        --format 'value(address)'
+      changed_when: false
+      register: kubernetes_api_static_ip_address
+      run_once: true
+
+    - name: Create the kubelet Kubernetes Configuration File
+      local_action: > 
+        command kubectl config set-cluster kubernetes-the-hard-way 
+        --certificate-authority={{ kubernetes_local_certs_dir }}/ca.pem 
+        --embed-certs=true 
+        --server=https://{{ kubernetes_api_static_ip_address.stdout }}:6443 
+        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kubernetes_worker_local_config_file }}
+
+    - name: Set kubelet credentials
+      local_action: > 
+        command kubectl config set-credentials system:node:{{ inventory_hostname }} \
+        --client-certificate={{ kubernetes_local_certs_dir }}/{{ inventory_hostname }}.pem \
+        --client-key={{ kubernetes_local_certs_dir }}/{{ inventory_hostname }}-key.pem \
+        --embed-certs=true \
+        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kubernetes_worker_local_config_file }}
+
+    - name: Set kubelet context
+      local_action: > 
+        command kubectl config set-context default \
+        --cluster=kubernetes-the-hard-way \
+        --user=system:node:{{ inventory_hostname }} \
+        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kubernetes_worker_local_config_file }}
+
+    - name: Use kubelet context
+      local_action: > 
+        command kubectl config use-context default 
+        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kubernetes_worker_local_config_file }}
+
+    - name: Copy kubelet config to host
+      copy: 
+        src: '{{ kubernetes_local_configs_dir }}/{{ item }}'
+        # TODO proper dir
+        dest: '/tmp/{{ item }}'
+      with_items:
+        - '{{ kubernetes_worker_local_config_file }}'

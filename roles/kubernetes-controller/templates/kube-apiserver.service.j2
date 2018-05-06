@@ -31,8 +31,7 @@ ExecStart={{ kubernetes_controller_bin_dir }}/kube-apiserver \
   --kubelet-https=true \
   --runtime-config=api/all \
   --service-account-key-file={{ kubernetes_controller_data_dir }}/ca-key.pem \
-  {# TODO ip form variable #}
-  --service-cluster-ip-range=10.32.0.0/24 \
+  --service-cluster-ip-range={{ kubernetes_controller_cluster_ip_range }} \
   {# TODO port range form variable #}
   --service-node-port-range=30000-32767 \
   --tls-ca-file={{ kubernetes_controller_data_dir }}/ca.pem \

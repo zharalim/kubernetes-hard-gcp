@@ -4,9 +4,11 @@ kubernetes_version: 1.9.0
 
 kubernetes_etcd_client_port: 2379
 
+kubernetes_controller_cluster_ip_range: 10.32.0.0/24
+kubernetes_controller_api_svc_ip: 10.32.0.1
+
 kubernetes_controller_csr_hostnames_base:
-  # TODO Fix first ip address
-  - 10.32.0.1,
+  - '{{ kubernetes_controller_api_svc_ip }}',
   - 127.0.0.1,
   - kubernetes.default
 

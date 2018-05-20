@@ -26,3 +26,6 @@ cfssl_ca_request_dir: '{{ cfssl_ca_dir }}/requests'
 
 cfssl_ca_user: vagrant
 cfssl_ca_group: vagrant
+
+kubernetes_version: 1.9.0
+kubernetes_download_url_base: https://storage.googleapis.com/kubernetes-release/release

@@ -1,5 +1,20 @@
 ---
 
+- hosts: all
+  tasks:
+    - name: Get public API ip address 
+      local_action: >
+        command gcloud compute addresses describe {{ kubernetes_api_static_ip_address_name }} 
+        --region {{ gce_region }}
+        --format 'value(address)'
+      changed_when: false
+      register: kubernetes_api_static_ip_address_result
+      run_once: true
+
+    - name: Set public API ip address to fact
+      set_fact: 
+        kubernetes_api_static_ip_address: '{{ kubernetes_api_static_ip_address_result.stdout }}'
+
 - hosts: certificate-authorities
   roles: 
     - cfssl-ca
@@ -13,7 +28,11 @@
 - hosts: tag_controller
   roles: 
     - etcd
-    - kubernetes-controller
+    - kube-apiserver
+    - kube-proxy
+    #- kube-scheduler
+    - kube-controller-manager
+    #- kubernetes-controller
   tags: controllers
 
 - hosts: tag_worker

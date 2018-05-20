@@ -10,7 +10,7 @@
       mode: custom
       subnet_name: '{{ gce_subnet_name }}'
       subnet_region: '{{ gce_region }}'
-      ipv4_range: '10.240.0.0/24'
+      ipv4_range: '{{ kubernetes_subnet_ip_range }}'
       state: present
       credentials_file: '{{ gce_credentials_file }}'
       service_account_email: '{{ gce_service_account_email }}'
@@ -25,8 +25,8 @@
       allowed: 'tcp;udp;icmp'
       state: present
       src_range: 
-        - 10.200.0.0/16
-        - 10.240.0.0/24
+        - '{{ kubernetes_pods_ip_range }}'
+        - '{{ kubernetes_subnet_ip_range }}'
       credentials_file: '{{ gce_credentials_file }}'
       service_account_email: '{{ gce_service_account_email }}'
       project_id: '{{ gce_project_id }}'

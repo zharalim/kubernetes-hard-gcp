@@ -1,0 +1,95 @@
+---
+
+- name: Create dirs
+  file: 
+    path: '{{ item }}'
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  with_items: 
+    - '{{ kube_master_component_data_dir }}'
+    - '{{ kube_master_component_bin_dir }}'
+  become: true
+
+- name: Install binaries
+  get_url: 
+    url: '{{ item }}'
+    dest: '{{ kube_master_component_bin_dir }}'
+    mode: '0755'
+  with_items:
+    - '{{ kubernetes_download_url_base }}/v{{ kubernetes_version }}/bin/linux/amd64/{{ kube_master_component_name }}'
+    - '{{ kubernetes_download_url_base }}/v{{ kubernetes_version }}/bin/linux/amd64/kubectl'
+  become: true
+
+- name: Create configuration
+  block: 
+    # Cannot use import role because of lazy evaluation
+    - name: Certificate request
+      import_tasks: '{{ role_path }}/../cfssl-csr/tasks/main.yml'
+      vars: 
+        cfssl_csr: 
+          name: '{{ kube_master_component_name }}'
+          hostnames: '{{ kube_master_component_csr_hostnames | default(omit) }}'
+          csr_path: '{{ playbook_dir }}/roles/kube-master-component/templates/csr.json.j2'
+
+    - name: Create configuration File
+      local_action: > 
+        command kubectl config set-cluster kubernetes-the-hard-way 
+        --certificate-authority={{ kubernetes_local_certs_dir }}/ca.pem 
+        --embed-certs=true 
+        --server=https://{{ kube_master_component_server_ip }}:6443 
+        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kube_master_component_name }}.kubeconfig
+
+    - name: Set credentials
+      local_action: > 
+        command kubectl config set-credentials system:node:{{ inventory_hostname }} \
+        --client-certificate={{ kubernetes_local_certs_dir }}/{{ kube_master_component_name }}.pem \
+        --client-key={{ kubernetes_local_certs_dir }}/{{ kube_master_component_name }}-key.pem \
+        --embed-certs=true \
+        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kube_master_component_name }}.kubeconfig
+
+    - name: Set context
+      local_action: > 
+        command kubectl config set-context default \
+        --cluster=kubernetes-the-hard-way \
+        --user=system:node:{{ inventory_hostname }} \
+        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kube_master_component_name }}.kubeconfig
+  tags: configure
+
+- name: Configure host
+  block: 
+
+    - name: Copy kubeconfig config to host
+      copy: 
+        src: '{{ kubernetes_local_configs_dir }}/{{ item }}'
+        dest: '{{ kube_master_component_data_dir }}/{{ item }}'
+      with_items:
+        - '{{ kube_master_component_name }}.kubeconfig'
+
+    - name: Copy certificates to host
+      copy: 
+        src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
+        dest: '/{{ kube_master_component_data_dir }}/{{ item }}'
+      with_items:
+        - '{{ kube_master_component_name }}.pem'
+        - '{{ kube_master_component_name }}-key.pem'
+        - ca.pem
+
+    - name: Copy config to hosts
+      copy: 
+        src: '{{ kubernetes_local_configs_dir }}/{{ item }}'
+        dest: '{{ kube_controller_manager_data_dir }}/{{ item }}'
+      with_items: '{{ kube_master_component_config_list | default([]) }}'
+
+    - name: Copy service config
+      template: 
+        src: '{{ item }}.j2'
+        dest: /etc/systemd/system/{{ item }}
+        mode: '0600'
+      with_items: 
+        - '{{ kube_master_component_name }}.service'
+      notify: Reload systemctl daemon
+
+  become: true
+  tags: configure 

@@ -29,19 +29,6 @@
 
 - name: Configure
   block: 
-    - name: Copy service configs
-      template: 
-        src: '{{ item }}.j2'
-        dest: /etc/systemd/system/{{ item }}
-      with_items:
-        - kube-apiserver.service
-      become: true
-
-    - name: Get API ip address 
-      local_action: command gcloud compute addresses describe {{ kubernetes_api_static_ip_address_name }} --region {{ gce_region }} --format 'value(address)'
-      changed_when: false
-      register: kubernetes_api_static_ip_address
-      run_once: true
 
     - name: Certificate request for Kubernetes API Server certificate
       import_role: 
@@ -51,7 +38,7 @@
           name: kubernetes
           hostnames: "{{ kubernetes_controller_csr_hostnames_base 
             + kubernetes_controller_host_ip_list 
-            + [kubernetes_api_static_ip_address.stdout] }}"
+            + [kubernetes_api_static_ip_address] }}"
           # The included role seems to evaluate role_path to itself.
           csr_path: '{{ playbook_dir }}/roles/kubernetes-controller/files/kubernetes-csr.json'
       run_once: true

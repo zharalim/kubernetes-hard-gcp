@@ -8,10 +8,10 @@
         owner: root
         group: root
         mode: '0755'
-      become: true
       with_items: 
         - '{{ etcd_bin_dir }}'
         - '{{ etcd_data_dir }}'
+        - '{{ etcd_config_dir }}'
         - /tmp/etcd
 
     - name: Get binaries
@@ -28,10 +28,10 @@
         mode: '0755'
         owner: root
         group: root
-      become: true
       with_items: 
         - etcd
         - etcdctl
+  become: true
   tags: install
 
 - block: 
@@ -39,7 +39,6 @@
       copy: 
         src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
         dest: '/{{ etcd_config_dir }}/{{ item }}'
-      become: true
       with_items:
         - kubernetes.pem
         - kubernetes-key.pem
@@ -52,8 +51,8 @@
         mode: '0600'
       with_items: 
         - etcd.service
-      become: true
       notify: Reload systemctl daemon
+  become: true
   tags: configure 
   
 - name: Start etcd

@@ -28,21 +28,12 @@
 
 - name: Create Kubelet configuration
   block: 
-    - name: Get API ip address 
-      local_action: >
-        command gcloud compute addresses describe {{ kubernetes_api_static_ip_address_name }} 
-        --region {{ gce_region }}
-        --format 'value(address)'
-      changed_when: false
-      register: kubernetes_api_static_ip_address
-      run_once: true
-
     - name: Create the kubelet Kubernetes Configuration File
       local_action: > 
         command kubectl config set-cluster kubernetes-the-hard-way 
         --certificate-authority={{ kubernetes_local_certs_dir }}/ca.pem 
         --embed-certs=true 
-        --server=https://{{ kubernetes_api_static_ip_address.stdout }}:6443 
+        --server=https://{{ kubernetes_api_static_ip_address }}:6443 
         --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kubernetes_worker_local_config_file }}
 
     - name: Set kubelet credentials

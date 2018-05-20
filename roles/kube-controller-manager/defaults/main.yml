@@ -1,0 +1,4 @@
+---
+
+kube_controller_manager_data_dir: /var/lib/kubernetes
+kube_controller_manager_bin_dir: '/usr/local/bin'

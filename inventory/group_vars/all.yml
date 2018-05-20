@@ -1,0 +1,8 @@
+---
+
+kubernetes_pods_ip_range: 10.200.0.0/16
+
+kubernetes_subnet_ip_range: 10.240.0.0/24
+kubernetes_cluster_ip_range: 10.32.0.0/24
+
+etcd_cluster_hosts: "{{ groups['etcd-servers'] }}"

@@ -1,0 +1,16 @@
+---
+
+- name: Master component configuration
+  import_tasks: '{{ role_path }}/../kube-master-component/tasks/main.yml'
+  vars: 
+    kube_master_component_name: kube-controller-manager
+    kube_master_component_server_ip: '{{ kubernetes_api_static_ip_address }}'
+    kube_master_component_data_dir: '{{ kube_controller_manager_data_dir }}'
+    kube_master_component_bin_dir: '{{ kube_controller_manager_bin_dir }}'
+
+- name: Start controller manager
+  service:
+    name: kube-controller-manager
+    state: started
+    enabled: true
+  become: true

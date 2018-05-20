@@ -1,0 +1,4 @@
+---
+
+kube_proxy_data_dir: /var/lib/kubernetes
+kube_proxy_bin_dir: /usr/local/bin

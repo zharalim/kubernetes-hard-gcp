@@ -1,0 +1,20 @@
+---
+
+- name: Master component configuration
+  import_tasks: '{{ role_path }}/../kube-master-component/tasks/main.yml'
+  vars: 
+    kube_master_component_name: kube-apiserver
+    kube_master_component_csr_path: '{{ playbook_dir }}/roles/kube-apiserver/files/kubernetes-csr.json'
+    kube_master_component_csr_hostnames: "{{ kube_apiserver_csr_hostnames_base 
+            + kube_apiserver_host_ip_list 
+            + [kubernetes_api_static_ip_address] }}"
+    kube_master_component_server_ip: '{{ kubernetes_api_static_ip_address }}'
+    kube_master_component_data_dir: '{{ kube_apiserver_data_dir }}'
+    kube_master_component_bin_dir: '{{ kube_apiserver_bin_dir }}'
+
+- name: Start service
+  service:
+    name: kube-apiserver
+    state: started
+    enabled: true
+  become: true

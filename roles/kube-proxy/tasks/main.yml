@@ -1,45 +1,12 @@
 ---
 
-- name: Create configuration
-  block: 
-    - name: Certificate request
-      import_role: 
-        name: cfssl-csr
-      vars: 
-        cfssl_csr: 
-          name: kube-proxy
-          csr_path: '{{ playbook_dir }}/roles/kube-proxy/files/proxy-csr.json'
+- name: Master component configuration
+  import_tasks: '{{ role_path }}/../kube-master-component/tasks/main.yml'
+  vars: 
+    kube_master_component_name: kube-proxy
+    kube_master_component_server_ip: '{{ kubernetes_api_static_ip_address }}'
+    kube_master_component_data_dir: '{{ kube_proxy_data_dir }}'
+    kube_master_component_bin_dir: '{{ kube_proxy_bin_dir }}'
 
-    - name: Create configuration File
-      local_action: > 
-        command kubectl config set-cluster kubernetes-the-hard-way 
-        --certificate-authority={{ kubernetes_local_certs_dir }}/ca.pem 
-        --embed-certs=true 
-        --server=https://{{ kubernetes_api_static_ip_address.stdout }}:6443 
-        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kube_proxy_local_config_file  }}
-
-    - name: Set credentials
-      local_action: > 
-        command kubectl config set-credentials system:node:{{ inventory_hostname }} \
-        --client-certificate={{ kubernetes_local_certs_dir }}/{{ inventory_hostname }}.pem \
-        --client-key={{ kubernetes_local_certs_dir }}/{{ inventory_hostname }}-key.pem \
-        --embed-certs=true \
-        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kube_proxy_local_config_file }}
-
-    - name: Set context
-      local_action: > 
-        command kubectl config set-context default \
-        --cluster=kubernetes-the-hard-way \
-        --user=system:node:{{ inventory_hostname }} \
-        --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kube_proxy_local_config_file }}
-  run_once: true
-  tags: configure
-
-- name: Copy config to hosts
-  copy: 
-    src: '{{ kubernetes_local_configs_dir }}/{{ item }}'
-    # TODO proper dir
-    dest: '/tmp/{{ item }}'
-  with_items:
-    - '{{ kube_proxy_local_config_file }}'
-  tags: configure
+    
+# TODO service handling

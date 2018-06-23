@@ -24,14 +24,14 @@
 
 - name: Create configuration
   block: 
-    # Cannot use import role because of lazy evaluation
     - name: Certificate request
-      import_tasks: '{{ role_path }}/../cfssl-csr/tasks/main.yml'
+      import_role: 
+        name: 'cfssl-csr'
       vars: 
         cfssl_csr: 
           name: '{{ kube_master_component_name }}'
           hostnames: '{{ kube_master_component_csr_hostnames | default(omit) }}'
-          csr_path: '{{ playbook_dir }}/roles/kube-master-component/templates/csr.json.j2'
+          csr_path: 'csr.json.j2'
 
     - name: Create configuration File
       local_action: > 
@@ -43,7 +43,7 @@
 
     - name: Set credentials
       local_action: > 
-        command kubectl config set-credentials system:node:{{ inventory_hostname }} \
+        command kubectl config set-credentials system:node:{{ kube_master_component_name }} \
         --client-certificate={{ kubernetes_local_certs_dir }}/{{ kube_master_component_name }}.pem \
         --client-key={{ kubernetes_local_certs_dir }}/{{ kube_master_component_name }}-key.pem \
         --embed-certs=true \
@@ -53,8 +53,9 @@
       local_action: > 
         command kubectl config set-context default \
         --cluster=kubernetes-the-hard-way \
-        --user=system:node:{{ inventory_hostname }} \
+        --user=system:node:{{ kube_master_component_name }} \
         --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kube_master_component_name }}.kubeconfig
+  run_once: true
   tags: configure
 
 - name: Configure host
@@ -76,10 +77,10 @@
         - '{{ kube_master_component_name }}-key.pem'
         - ca.pem
 
-    - name: Copy config to hosts
-      copy: 
-        src: '{{ kubernetes_local_configs_dir }}/{{ item }}'
-        dest: '{{ kube_controller_manager_data_dir }}/{{ item }}'
+    - name: Copy configs to hosts
+      template: 
+        src: '{{ item }}.j2'
+        dest: '{{ kube_controller_manager_conf_dir }}/{{ item }}'
       with_items: '{{ kube_master_component_config_list | default([]) }}'
 
     - name: Copy service config

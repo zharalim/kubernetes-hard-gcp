@@ -13,7 +13,7 @@
             - '{{ gce_private_ip }}'
             - '{{ gce_public_ip }}'
           # The included role seems to evaluate role_path to itself.
-          csr_path: '{{ playbook_dir }}/roles/kubernetes-worker/templates/worker-csr.json.j2'
+          csr_path: 'worker-csr.json.j2'
 
     - name: Copy certificates to host
       copy: 

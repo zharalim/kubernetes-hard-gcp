@@ -12,3 +12,4 @@ kube_apiserver_csr_hostnames_base:
   - kubernetes.default
 kube_apiserver_host_ip_list: "{{ groups['tag_controller'] | map('extract', hostvars, 'gce_private_ip') | list }}"
 
+kube_apiserver_encryption_config_local: '{{ kubernetes_local_configs_dir }}/encryption_config.yml'

@@ -20,6 +20,10 @@
     - cfssl-ca
   tags: ca
 
+- hosts: localhost
+  roles:
+    - kube-common
+
 - hosts: kubernetes-clients
   roles: 
     - kubernetes-client

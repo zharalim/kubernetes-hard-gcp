@@ -1,0 +1,19 @@
+---
+
+- name: Master component configuration
+  import_role: 
+    name: 'kube-master-component'
+  vars: 
+    kube_master_component_name: kube-controller-manager
+    kube_master_component_server_ip: '127.0.0.1'
+    kube_master_component_data_dir: '{{ kube_scheduler_data_dir }}'
+    kube_master_component_bin_dir: '{{ kube_scheduler_bin_dir }}'
+    kube_master_component_config_list: 
+      - kube-scheduler.yml
+
+- name: Start service
+  service:
+    name: kube-scheduler
+    state: started
+    enabled: true
+  become: true

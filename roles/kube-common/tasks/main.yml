@@ -1,0 +1,9 @@
+---
+
+- name: Certificate request for kubernetes
+  import_role: 
+    name: cfssl-csr
+  vars: 
+    cfssl_csr: 
+      name: 'kubernetes'
+      csr_path: 'kubernetes-csr.json'

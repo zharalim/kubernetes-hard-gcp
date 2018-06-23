@@ -7,7 +7,7 @@ This is a repo in which I'll do Kubernetes the hard way tutorial
 - Ansible cloud modules 
 
 Getting Ansible running:
-1. Run `vagrant up`
+1. Run `vagrant up` to get linux machine for development
 1. Create project `gcloud projects create --name kubernetes-hard`
 1. Get credentials for google service account
 1. Put google credentials json file to `secrets/service-credentials.json`

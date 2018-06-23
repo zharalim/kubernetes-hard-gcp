@@ -1,0 +1,5 @@
+---
+
+kube_scheduler_bin_dir: /usr/local/bin
+kube_scheduler_data_dir: /var/lib/kubernetes
+kube_scheduler_conf_dir: /etc/kubernetes/config/

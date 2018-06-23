@@ -1,6 +1,4 @@
 ---
 
-kubernetes_controller_encryption_config_local: '{{ kubernetes_local_configs_dir }}/encryption_config.yml'
-
 kubernetes_controller_bin_dir: /usr/local/bin
 kubernetes_controller_data_dir: /var/lib/kubernetes

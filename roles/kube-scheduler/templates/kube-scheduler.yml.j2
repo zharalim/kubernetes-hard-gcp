@@ -1,0 +1,8 @@
+---
+
+apiVersion: componentconfig/v1alpha1
+kind: KubeSchedulerConfiguration
+clientConnection:
+  kubeconfig: "{{ kube_scheduler_data_dir }}/kube-scheduler.kubeconfig"
+leaderElection:
+  leaderElect: true

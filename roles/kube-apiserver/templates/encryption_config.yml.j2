@@ -9,5 +9,5 @@ resources:
       - aescbc:
           keys:
             - name: key1
-              secret: {{ kubernetes_controller_encryption_key }}
+              secret: {{ kube_apiserver_encryption_key }}
       - identity: {}

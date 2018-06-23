@@ -1,0 +1,8 @@
+---
+
+kubernetes_controller_api_svc_ip: 10.32.0.1
+kube_common_csr_hostnames_base:
+  - '{{ kubernetes_controller_api_svc_ip }}'
+  - 127.0.0.1,
+  - kubernetes.default
+kube_common_controllers_ip_list: "{{ groups['tag_controller'] | map('extract', hostvars, 'gce_private_ip') | list }}"

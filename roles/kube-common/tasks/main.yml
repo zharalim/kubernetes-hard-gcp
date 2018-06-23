@@ -1,9 +1,20 @@
 ---
 
-- name: Certificate request for kubernetes
+- name: Certificate request for api
   import_role: 
     name: cfssl-csr
   vars: 
     cfssl_csr: 
       name: 'kubernetes'
+      csr_hostnames: "{{ kube_common_csr_hostnames_base 
+            + kube_common_controllers_ip_list 
+            + [kubernetes_api_static_ip_address] }}"
       csr_path: 'kubernetes-csr.json'
+
+- name: Certificate request for service account
+  import_role: 
+    name: cfssl-csr
+  vars: 
+    cfssl_csr: 
+      name: 'service-account'
+      csr_path: 'service-account-csr.json'

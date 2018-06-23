@@ -1,6 +1,7 @@
 ---
 
 - hosts: all
+  tags: always 
   tasks:
     - name: Get public API ip address 
       local_action: >
@@ -34,9 +35,8 @@
     - etcd
     - kube-apiserver
     - kube-proxy
-    #- kube-scheduler
+    - kube-scheduler
     - kube-controller-manager
-    #- kubernetes-controller
   tags: controllers
 
 - hosts: tag_worker

@@ -5,11 +5,4 @@ kube_apiserver_bin_dir: /usr/local/bin
 
 kubernetes_etcd_client_port: 2379
 
-kubernetes_controller_api_svc_ip: 10.32.0.1
-kube_apiserver_csr_hostnames_base:
-  - '{{ kubernetes_controller_api_svc_ip }}'
-  - 127.0.0.1,
-  - kubernetes.default
-kube_apiserver_host_ip_list: "{{ groups['tag_controller'] | map('extract', hostvars, 'gce_private_ip') | list }}"
-
 kube_apiserver_encryption_config_local: '{{ kubernetes_local_configs_dir }}/encryption_config.yml'

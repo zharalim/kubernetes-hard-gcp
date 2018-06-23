@@ -1,4 +1,0 @@
----
-
-kubernetes_controller_bin_dir: /usr/local/bin
-kubernetes_controller_data_dir: /var/lib/kubernetes

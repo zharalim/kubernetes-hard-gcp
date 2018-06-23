@@ -56,6 +56,7 @@
         --user=system:node:{{ kube_master_component_name }} \
         --kubeconfig={{ kubernetes_local_configs_dir }}/{{ kube_master_component_name }}.kubeconfig
   run_once: true
+  when: kube_master_component_csr_path is defined
   tags: configure
 
 - name: Configure host
@@ -68,6 +69,13 @@
       with_items:
         - '{{ kube_master_component_name }}.kubeconfig'
 
+    - name: Copy ca certificates to host
+      copy: 
+        src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
+        dest: '/{{ kube_master_component_data_dir }}/{{ item }}'
+      with_items:
+        - ca.pem
+
     - name: Copy certificates to host
       copy: 
         src: '{{ kubernetes_local_certs_dir }}/{{ item }}'
@@ -76,11 +84,12 @@
         - '{{ kube_master_component_name }}.pem'
         - '{{ kube_master_component_name }}-key.pem'
         - ca.pem
+      when: kube_master_component_csr_path is defined
 
     - name: Copy configs to hosts
       template: 
         src: '{{ item }}.j2'
-        dest: '{{ kube_controller_manager_conf_dir }}/{{ item }}'
+        dest: '{{ kube_master_component_data_dir }}/{{ item }}'
       with_items: '{{ kube_master_component_config_list | default([]) }}'
 
     - name: Copy service config
